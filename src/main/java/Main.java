@@ -12,8 +12,8 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-        //String basket = "PriceBasket Apples Milk Bread";
-        String basket = "PriceBasket Apples Milk Soup Soup Soup Soup Bread Bread";
+         String basket = "PriceBasket Apples Milk Bread";
+         // String basket = "PriceBasket Apples Milk Soup Soup Soup Soup Bread Bread";
 
 
         String[] basketArray = basket.split(" ");

@@ -16,4 +16,13 @@ public class ItemServiceTest {
         // assertEquals(item.getPrice(), .65);
     }
 
+    @Test
+    public void ShouldReturnNullIfProductNotExists() {
+
+        ItemService itemService = new ItemService(new InMemoryItemDAOImpl());
+        Item item = itemService.getItem("Banana");
+        assertEquals(item.getItemName(), "Soup");
+        // assertEquals(item.getPrice(), .65);
+    }
+
 }

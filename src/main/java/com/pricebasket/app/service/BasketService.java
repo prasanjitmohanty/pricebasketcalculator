@@ -77,17 +77,19 @@ public class BasketService {
                             .filter(t -> t.getOfferItemName().equals(entry.getKey())).findFirst().get().getSrcQuantity();
                     double disc = multiItemDiscs.stream()
                             .filter(t -> t.getOfferItemName().equals(entry.getKey())).findFirst().get().getDisc();
-                    if (offerSourceQuantity >= entry.getValue()) {
+                    int srcItemsInbasket = shoppingBasket.get(offerSourceItem);
+                    int itemQunatity = entry.getValue();
+                    for(int i=srcItemsInbasket ;(i > 1 && itemQunatity >0);i= srcItemsInbasket - offerSourceQuantity) {
                         Item curItem = itemService.getItem(entry.getKey());
                         double itemPrice = curItem.getPrice();
                         double discPrice = itemPrice * (disc / 100);
 
                         total -= discPrice;
+                        itemQunatity--;
+                        DecimalFormat format = new DecimalFormat("0.#");
+                        String discString = format.format(disc);
+                        msgList.add(String.format("Buy %d %s get %s  %s%%  Off", offerSourceQuantity, offerSourceItem, entry.getKey(), discString));
                     }
-
-                    DecimalFormat format = new DecimalFormat("0.#");
-                    String discString = format.format(disc);
-                    msgList.add(String.format("Buy %d %s get %s  %s%%  Off", offerSourceQuantity, offerSourceItem, entry.getKey(), discString));
 
                 }
             }
