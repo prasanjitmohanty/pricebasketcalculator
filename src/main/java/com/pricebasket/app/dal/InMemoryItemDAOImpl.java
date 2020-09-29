@@ -19,6 +19,6 @@ public class InMemoryItemDAOImpl implements ItemDAO {
     }
     public Item getItem(String itemName){
         return items.stream()
-                .filter(t->t.getItemName().equals(itemName)).findFirst().get();
+                .filter(t->t.getItemName().equals(itemName)).findFirst().orElse(null);
     }
 }

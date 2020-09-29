@@ -52,8 +52,9 @@ public class BasketService {
         double subTotal = 0.0;
         double total = 0.0;
         for (String bt : bItems) {
-            shoppingBasket.merge(bt, 1, Integer::sum);
             Item curItem = itemService.getItem(bt);
+            if(curItem == null) continue;
+            shoppingBasket.merge(bt, 1, Integer::sum);
             double disc;
             double itemPrice = curItem.getPrice();
             subTotal += itemPrice;
