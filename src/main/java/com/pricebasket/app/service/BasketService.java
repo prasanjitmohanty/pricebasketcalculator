@@ -4,6 +4,7 @@ package com.pricebasket.app.service;
 
 
 
+import com.pricebasket.app.model.BasketResult;
 import com.pricebasket.app.model.Item;
 import com.pricebasket.app.model.MultiItemDiscOffer;
 import com.pricebasket.app.model.SingleItemDiscOffer;
@@ -19,24 +20,35 @@ public class BasketService {
 
     private ItemService itemService;
     private OfferService offerService;
-    private Map<String, Integer> shoppingBasket = new HashMap<>();
-    static List<String> msgList = new ArrayList<>();
 
     public BasketService(ItemService itemService, OfferService offerService){
         this.itemService = itemService;
         this.offerService = offerService;
     }
 
-    public List<String> ProcessBasket(String[] bItems){
+    public BasketResult ProcessBasket(String[] bItems){
 
+        BasketResult basketResult = new BasketResult();
         //Get Single Item Offers
         List<SingleItemDiscOffer> singleItemDiscs = offerService.getSinleItemOffers();
 
         //Get Multi Item Offers
         List<MultiItemDiscOffer> multiItemDiscs = offerService.getMultiItemOffers();
 
+        //process all Items and apply single item discount
+        Map<String,Integer> shoppingBasket =  processSingleItemDiscounts(singleItemDiscs, bItems, basketResult);
 
+        //Process all Muti Item Discounts
+        processMultiItemDiscounts(multiItemDiscs, shoppingBasket, basketResult);
 
+        //Return basket result
+        return basketResult;
+
+    }
+
+    private Map<String, Integer> processSingleItemDiscounts(List<SingleItemDiscOffer> singleItemDiscs, String[] bItems, BasketResult basketResult){
+        Map<String, Integer> shoppingBasket = new HashMap<>();
+        List<String> msgList = new ArrayList<>();
         double subTotal = 0.0;
         double total = 0.0;
         for (String bt : bItems) {
@@ -63,6 +75,15 @@ public class BasketService {
 
         }
 
+        msgList.add(0, String.format("Subtotal: %.2f", subTotal));
+        basketResult.setSubTotal(subTotal);
+        basketResult.setTotal(total);
+        basketResult.setMessages(msgList);
+        return shoppingBasket;
+    }
+
+    private void processMultiItemDiscounts(List<MultiItemDiscOffer> multiItemDiscs, Map<String, Integer> shoppingBasket,BasketResult basketResult){
+        double total = basketResult.getTotal();
         for (Map.Entry<String, Integer> entry : shoppingBasket.entrySet()) {
             boolean multiBuyDiscExists = multiItemDiscs.stream()
                     .anyMatch(t -> t.getOfferItemName().equals(entry.getKey()));
@@ -88,17 +109,13 @@ public class BasketService {
                         itemQunatity--;
                         DecimalFormat format = new DecimalFormat("0.#");
                         String discString = format.format(disc);
-                        msgList.add(String.format("Buy %d %s get %s  %s%%  Off", offerSourceQuantity, offerSourceItem, entry.getKey(), discString));
+                        basketResult.getMessages().add(String.format("Buy %d %s get %s  %s%%  Off", offerSourceQuantity, offerSourceItem, entry.getKey(), discString));
                     }
 
                 }
             }
         }
-
-
-        msgList.add(0, String.format("Subtotal: %.2f", subTotal));
-
-        msgList.add(String.format("Total: %.2f", total));
-        return msgList;
+        basketResult.setTotal(total);
+        basketResult.getMessages().add(String.format("Total: %.2f", total));
     }
 }
